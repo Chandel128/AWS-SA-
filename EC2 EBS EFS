@@ -1,0 +1,89 @@
+*EC2 ON-demand
+*Reserved Instances-66 DISCOUNT
+reserve for1 year and 3year
+steady state application like database
+Convertible can change the ec2 instance tenancy os
+*EC2 SAVING PLANS-72 
+*ec2 spot instance-can loose at any time if current price is more than your price
+used for workloads that are resilent for failures
+data analysis
+image processing
+Batch jobs
+distributed workloads
+*Ec2 dedicated hosts-a physical server totally distributed to you
+*EC2 dedicated instances-insatnce running on hardware dedicated to you
+*EC2 Capacity Reservations
+
+
+
+#Spot instances-2 min grace period
+spot requests one time-persistent (if your ec2 some how terminated your request goes back in loop.
+delete the request first then instances
+
+
+Spot fleet-mix of on demand + spot instance-spot fleet will try to meet the target with target constraints-IT give us extra saving option in choosing spot instances
+have multiple launch pools so fleet can chooose
+ strategies to allocate spot instances
+ lowest price-pool from lowest price
+ diversified-diversifies across multiple pools
+ capacity optimized-pool with optimal capacity
+ price capacity optimized:pools with highest capacity and then select the lowest price from that
+ 
+ 
+ 
+ ####Placements groups
+ sometime you want to control over your ec2 placement strategy
+ CLUSTER instance in a low latency group in a single availability zone-same rack same az so if rack fail all insatnces fail at same time
+ when we use it -we want big data job to complete fast-high n/w for application
+ spread-spread instances across underlying hardware-all instances are not diff hardware-less risk failures-limit 7 instaneces per AZ
+ USE CASE CRITICAL APPLICATION
+ HIGH AVAILABILITY
+ CRITICAL APPLICATION IN WHICH INSTANCES SHOULD BE ISOLATED FROM EACH OTHER
+ 
+ partition-spread instances across multiple PARTITIONS
+ 7 PARTITION PER AZ PARTITION IS Basically a rack 
+ rack 1 -us-east1
+ rack2-us east2
+ big data hadoop,kafka
+ 
+ #Elastic n/w interface-it is like moving your network card from one ec2 to another like transter public ip from one ec2 to another
+ EC2 Hibernate:
+ you want to save the ram state and without restarting os it will only restart the memory
+ hibernate-ram state into a file in ebs volume -ram will start again
+ not more than 60 days
+ ebs must be encrypted
+ 
+ 
+ 
+ ########################EC2 STORAGE#################################
+ 
+ ####EBS VOLUME-NETWORK DRIVE to store data
+ attached to one instance at a time except multiattach
+ these are bound to zones
+ but we can use snapshots 
+ ssd
+ gp2/gp3
+ io2/io2-critical workloads
+ critical business workloadd
+ database
+ st(hdd) can not be a boot volume for big data data warehousing 
+ sc(hdd)
+ 
+ ebs multiattach-io2/io3 family
+ you can attach volumes and attach it to multiple instance up to 16 instances at a time
+ 
+ ###Snapshots
+ you can archive your snapshots also you will need 24 to 72 hours in need to restore it 
+ 
+ #EC2 instance store-high performance hardware disk ,use ec2 instance store
+ it is ephermal storage once you terminate the instance you will lost it 
+ for long time storage ebs is better
+ better I/O performance
+ 
+ 
+ #EFS-Network File system that can be mounted on many ec2
+ this file system can be connected to multiple instances at a same time
+ can be used for webserver,data sharing,wordpress 
+ applicabe to only linux
+ EFS -PERFORMANCE AND STORAGE CLASS
+ 
