@@ -1,0 +1,84 @@
+####ELB AND ASB#########
+Scalibility and High Availibility:
+Vertical Scalibility to increase the size of instance from t2 medium to large
+Horizontal Scalibility-to increase the number of instance
+
+High Availibility means to run your app in two AZ to avoid datacentre loss 
+
+
+Load balancer:
+why we use it
+Spread load across multiple instances
+expose a single point of access for your application
+provide ssl termination
+JUST EXPose your ec2 to just your elb sg 
+
+
+type
+classical lb
+1.application lb - layer 7 http,https,websocket 
+it for multiple applications on same machine microservices
+Route based on a path url www.example.com/url www.example.com/hosts
+ALB are great fit for microservices and container based application ECS AND DOCKER
+
+
+2. n/w lb-transport layer 4 -tcp udp tls
+High performance millions of requests per second
+NLB has one static ip per AZ 
+Health check of nlp supports tcp,http,https protocol
+
+3.gateway lb-layer 3 -network layer-ip protocol
+
+deploy scale and manage a fleet of 3rd party network virtual appliances in AWS
+EXAMPLE IF YOU WANT YOUR NETWORK TO PASS THROUGH THE firewall,Intrusion Detection and Prevention Systems,Deep packet Inspection system,Payload Manipulation
+you want the traffic coming to your application first inspected
+user traffic will first goes through the gateway load balancer
+USE THE GENEVE PROTOCOL ON 608
+
+Stickiness:the client request will go to the previous ec2 oonly
+you have to defined custom cookies
+
+Cross zone load balancing
+we are distributing the traffic evenly across all the registred instances in all availability zones
+
+
+SSL/TSL BASICS
+SSL CERTIFICATE allows the traffic between and the load balancer to be encrypted in transit
+Ssl secure sockets layer
+tsl transport layer security newer version
+
+SNI server name indications
+solve the problem of loading multiple ssl certificates onto one server 
+newer protocol and reuire the client to enter the hostname of target server for initial handshake
+server will find the correct certificate and return the default one
+but only applicable for alb,nlb and cloudfront
+
+
+When using an Application Load Balancer to distribute traffic to your EC2 instances, the IP address you'll receive requests from will be the ALB's private IP addresses. To get the client's IP address, ALB adds an additional header called "X-Forwarded-For" contains the client's IP address.
+Question 5:
+You are using an Application Load Balancer to distribute traffic to your website hosted on EC2 instances. It turns out that your website only sees traffic coming from private IPv4 addresses which are in fact your Application Load Balancer's IP addresses. What should you do to get the IP address of clients connected to your website?
+
+
+#####ASG#######
+Scale out - to match the increased load- add ec2 instances
+Scale in - to match a decreased load-remove ec2 instances
+Ensure we have minimum and max number of instances running
+Automatically add ec2 instances to load balancer
+Recreate an Ec2 instance if previous one is unhealthy
+ASG is Free you only pay for the resources you use
+it is possible to scale your ASG using the cloudwatch Alarms
+
+
+ASG SCALING POLICIES
+DYNAMIC POLICY-Target Tracking Scaling-i want the cpu usage to be around 40%
+
+Simple/Step SCALING
+When a cloudwatch alarm trigger cpu>70% then add 2 units
+when a cloudwatch alarm trigger cpu >30% then remove 2 units
+
+Schedule Scaling -Automatic scaling based on usage patterns
+increase the ec2 on 10 to 5pm on friday
+
+Scaling cooldowns;after a scaling activity you will be on cooling perios approx 300 seconds
+During the cooldown Aws will not launch any ec2 instance
+Advice-use ami ready to use to reduce cooling period

@@ -1,0 +1,91 @@
+#######Route 53#####
+.com top level domain
+example.com - second level domain
+www.example.com -full domain name
+api.www.example.com-sub domain
+
+Route 53 highly available scalable and authorative dns
+autorative user can manag their records
+how you want to route traffic to your domain
+host the domain names
+
+A-Map your domain name to ipv4
+aaaa-domain name to ipv6
+cname-hostname to a hostname
+nameserver--dns server -they are dns name ip address of these server respond to dns query
+how user requests 
+
+Public hosted zones -contain records that specify how to route traffic  on the internet
+Private Hosted Zones:Contain records that sepcify how your route traffic within one or more vpc for private company
+
+ttl -time to live how much time route53 taking to return request
+TTL stands for "Time to Live." It is a setting associated with each DNS record and determines how long a DNS resolver or client should cache the DNS information 
+before querying the authoritative nameservers again for fresh data.
+
+ALIAS POINT A DAOMAIN NAME TO A AWS RESOURCE
+WORK FOR ROOT DOMAIN AND NON ROOT DOMAIN
+ITS FOR:
+LB
+CLOUD FRONT
+BEANSTALK
+VPC END POINT 
+  DOES NOT APPLICABLE TO THE EC2 DNS
+  
+  
+  ROUTING POLICIES OF DNS
+  in dns routing does not mean routing traffic it means responds to dns queries
+  simple
+  weighted
+  failover
+  Latency based
+  Geolocation
+  Multi-Value Answer
+  Geoproximity
+  
+  
+  Health checks
+used to check the health of your resources before routing the user request 
+  can only be done for public hosted zone not for private zone which are hosted in vpc 
+  solution you have to set a cloudwatch metric and create the alarm then itself it will create the health check
+  
+  
+ Failover Routing Policy
+ Ec2 -Primary
+ Ec2-secondary/Disaster Recovery
+ so now route 53 will route the requests as per date before checking it with health checks if  primary fails then it will go to secondary
+ 
+ Geolocation
+ Based on geolocation
+ can be associated with health checks
+ restrict content sharing,load balacning
+ any user located to asia go to this ip
+ so you can set policies as per that
+ 
+ 
+ geoproximity
+ Route traffic to your resources based on the location of users and resources
+ ability to shift more traffic to resources based on defined bias
+ you have to set defined value
+ expand
+ shrink
+ 
+ Resource1              Resource 2
+ us-east1               us-west1
+ bias 0                   bias0
+ traffic will be divided equally
+ 
+ if we set bias=50 in resource2 then the traffic will be more in the Resource2
+ 
+ 
+ IP based Routing
+ Routing based on ip addresses of clients
+ you provide a list of your client CIDR(Classless inter domain routing) and the corresponding endpoints
+ optimize performance and reduce network costs
+ 
+ 
+ Multi-Value
+ When you want to route the traffic to multiple resources
+ can be associated with health checks
+ up to 8 healthy records run for each multi value query
+ 
+ 
