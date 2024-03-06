@@ -1,0 +1,237 @@
+##########RDS SERVICE- to manage database on cloud and it will be managed by AWS#####
+OPTIONS:
+MYSQL
+MARIADB
+POSTGRESSQL
+AURORA-AWS PROPIETARY SERVICE
+ORACLE
+IBM DB2
+
+
+WHY RDS
+rds is managed service Automated provisioning,os patching
+Continuos backups and restore to a specific timestamp
+Monitor dashboards
+Read Replicas for improved performance
+Multi AZ setup (Disaster Recovery)
+Maintanence windows for recovery
+stroage backed by ebs
+scalaibility
+you cant be login into rds instances ssh
+
+Storage Autoscaling
+increase the storage on your db instance dynamically
+when rds detects you are running out of free db storage it scales automatically
+you have to set a maximum limit 
+support multiple database engine
+Automatically increase storage if 
+  free storage is 10% of allocated storage
+  Low storage last atleast 5 minutes
+  6 hours have been passed since last modification
+  
+Useful for application with unpredeictable workloads
+since you cant access your rds instance you have create a another ec2 in same subnet and then connect the database
+
+
+
+Diff between Read replicas and multu az exam perspective
+Read replication-Replication of data in same region or cross region
+Up to 15 Read replication 
+Asynchronous replication-there will be some lag to replic data from primary db insatnces
+n asynchronous replication, changes from the primary system are replicated to the secondary systems with some delay. 
+Instead of waiting for confirmation that changes are applied on the secondary systems before committing transactions on the primary system, 
+the primary system continues processing transactions without waiting for acknowledgment from the secondary systems.
+Replication agents or processes periodically read the transaction log from the primary system and replicate the recorded changes (data modifications) to the secondary systems.
+ These changes are applied to the secondary systems asynchronously, meaning there's a delay between the changes occurring on the primary system and
+ their replication to the secondary systems.
+ 
+ Application must update the connection string to leverage read replicas
+ 
+ NOTE:Read replicas are only used to read not insert update and delete
+ 
+ Use case
+ 
+ 
+      Production application                          reportingA	Application
+	  
+	  
+	   write/read                                     Read
+	   
+	   primary db instance                              replica
+	   
+	   now i want to run report analysis on this db it will overload and affect the application what we can do now now make a reporting application and add read replica it will take read from that
+	  
+	  
+in aws there is n/w cost if data transfer from one az to another
+but in rds you dont pay that us east1 useast2 no cost
+but cross region will cost you 
+
+
+
+
+RDS Multi AZ (Disaster Recovery)
+
+Application
+
+ONE DNS NAME-AUTOMATIC FAILOVER
+so application will talk to the dns name and increase the availability
+rds db instance AZ(A)     -sync replication-    RDS DB instance standby  AZ(B)-its for standby not for scaling
+
+
+NOTE:YOU CAN SET UP YOUR READ REPLICA AS MULTI AZ FOR DISASTER RECOVERY
+
+RDS FROM SINGLE AZ TO MULTI AZ
+no downtime operation
+you need to just click 'modify' for the database
+how it happend behind the scenes
+it will take a snapshot of master and restore it in another ec2
+
+
+You can use sqlelectron in order to connect to your database
+
+
+RDS CUSTOM -you know that you can access the db instance with rds 
+but rds custom is available for oracle and sql  
+you can acess os and do all the activities using ssh and ec2
+deactivate automation mode so eds does not perfrom any automation
+
+
+
+
+######AMAZON AURORA#######-exam questions 
+propeitary technology of aws not open source
+support -postgress and mysql 
+it is cloud optimized and it provide better performance
+Aurora storage automatically grows in increments of 10GB and upto 128TB
+Aurora can have upto 15 replicas and replication process is much more than faster than mysql
+
+Aurora High Availibility and Read Scaling
+6 copies of your data across 3 AZ
+SHARED STORAGE VOLUME
+REPLICATION SELF HEALING AUTO EXPANDING
+ONE INSTANCE TAKES WRITES(master)
+Automated failover for master in less than 30 seconds
+read replications autoscalng up to 15
+
+#########
+Aurora also provide  Aurora db cluster contain 
+writer endpoint point to master-so that in any case the master stops client will be redirected to the another db instance
+Reader endpoint-it will point to the replicas so if client connect to this they will connect to the replicas
+
+AURORA FEATURES
+BACKUP AND Recovery
+AUTOMATED FAILOVER
+ISOLATION AND SECURITY
+Industry complaince
+Automated patching with zero downtime
+Advanced Monitoring
+Routine Maintainance
+Backtrack - u can restore data at any point withour backups
+
+
+
+Aurora Advance
+Aurora Replicas
+                           Client
+
+                      +---------------------+
+                      |      Aurora         |
+                      |      Cluster        |
+                      +---------------------+
+                                |
+                    +-----------|------------+
+                    |           |            |
+          +----------------+ +---------------+
+          | Writer Endpoint| | Reader Endpoint|       Custom ENDPOINT FOR BIGGER REPLICAS
+          +----------------+ +---------------+
+                     write          read
+                      Shared storage volume
+  we can use custom endpoints also in reader replicas we can add diff configuration like d2 medium lasrge
+  YOU WILL NOT USE READER ENDPOINT AFTER CUSTOM ENDPOINT
+  
+  
+  
+  Aurora Serverless
+  aurora will manager everything 
+  
+  client will talk to proxy fleet
+  then it will talk to aurora replicas
+  
+  
+  
+  Aurora Global
+  Aurora cross region replicas
+  aurora global database(recommended)
+  primary db 
+  secondary db upto 5 in multiple regions,replication lag is very 1 secondary
+  16 per region
+  less than 1 min for cross region data replication
+  
+  
+  
+  Aurora Machine Learning
+  Sagemaker use with any ml model
+  comprehend for sentiment analysis
+  
+  
+  
+  RDS BACKUP
+  AUTOMATED BACKUPS
+  TRANSACTION LOGS ARE BACKED BY RDS EVERY 5 MINUTES
+  1 TO 35 DAYS OF RETENTION SET 0 FOR AUTOMATED BACKUPS
+  
+  
+  manually db snapshots
+   trick -stopping a rds databse will still cost you more so  you can create a snapshot and restore it
+   
+   
+   Aurora backups
+   Automated
+   1 to 35 days can not be disabled
+   manual in time recovery-you can recover from any point of time
+   
+   
+   Manuall backups
+   db snapshots
+   retention period as long you want
+   
+   RDS AND AURORA RESTORE OPTIONS:
+   
+   
+   1. SNAPSHOTS
+   2.RESTORING FROM S3-FOR RDS DATABASE
+     STORE YOUR ON PREMISE DB IN S3
+	 RESTORE IT USING BACKUP FILE AND RUNNING IN INSTANCE
+3. FOR AURORA CLUSTER DB 
+   STORE YOUR CLUSTER BACKUP USING PERCON XTRA BACKUP
+   STORE THIS BACKUP FILE IN S3 
+THEN RUN IT ON NEW AURORA CLUSTER
+
+
+AURORA DB CLONING -BASICALLY A STAGING CLUSTER
+FASTER THAN SNAPSHOTS
+
+
+
+RDS AND AURORA SECURITY
+ENCRYPT USING KMS
+
+AUDT LOGS CAN BE STORED AND SENT TO CLOUDWATCH FOR RETENTION
+
+
+
+AMAZON RDS PROXY
+FULLY MANAGED DATABASE PROXY FOR RDS
+ALLOWS APPS TO POOL AND SHARE DB CONNECTION ESTABLISHED WITH DATABASE
+IMPROVE DATABASE EFFICENCY AND BY REDUCING STRESS ON DATABASE RESOURCES AND MINIMIZE OPEN CONNECTIONS
+SERVERLESS AUTOSCALING HIGH AVAILABLE
+REDUCED RDS AND AURORA FAILOVER TIME BY 66%
+RDS PROXY NEVER BE PUBLIC ACCESSIBLE
+PRACTICAL EXAMPLE-SUPPORSE YOU HAVE HUNDRED OF LAMBDA FUNCTION TRYING TO ACCESS TO THE DB INSTANCES
+SO NOW YOU WANT TO REDUCE THE LOAD RDS PROXY WILL ACT AS A POOL
+ENFORECE IAM AUTHENTICATION FOR DATABASE AND STORE CREDENTIALS IN SECRET MANAGER
+   
+
+	 
+	 
+	 
