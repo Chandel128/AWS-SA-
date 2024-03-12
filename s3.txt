@@ -1,0 +1,72 @@
+#################################S3#######################
+#infinity scaling storage
+s3 store data on buckets
+and buckets are like directories and files are storing in buckets
+Buckers are defined at the region level
+
+Objects these objects have a key:
+The key is the full path:
+https://s3/mybucket/myfile.text
+The key is comprised of prefix + object name
+
+The s3 objects are knows as key
+size 5tb max
+above 5gb use multi parts upload
+
+
+s3 security:
+user based:
+IAM Policies which api calls should be allowed for a specific user for iam
+resource based:
+Bucket Policies:bucket wide rules from the s3 console-allows cross account
+ Object Access Control list-finer grain can be disabled
+ Bucket ACL-less common can be disabled
+
+
+Note: the iam principal can access an s3 object if iam permissions allow it or resource policy allows it
+and there is no explicit for deny
+
+
+Encryption - encrypt the s3 object with api keys
+
+S3 bucket policies:
+Resources:buckets and objects
+Effect-Allow/deny
+Actions -Set of api to allow/deny
+Principal-the account or the user policy apply to
+
+
+#S3 Versioning
+you can version your files in s3
+enabled at the bucket level
+It is best practice to version your budgets
+Protected against unintended deletes
+Easy roll back to previous version
+
+Suspending versioning do not delete previous versions
+File uploaded before versioning is going to be null written against them
+
+
+
+Amazon s3 Replication
+After you enable replication you can add new objects
+to replicate existing objects also you have to do batch replication
+
+Delete marker are not replicated but you can also enable them 
+
+
+Storage classes in S3
+Standard-general purpose
+Frequently accessed Low latency
+Big Data analytics,Mobile and gaming applications
+Standard-Infrequent Access-Disaster recovery,backups
+One zone -in single AZ and data lost if AZ Crashed
+
+Amazon Glacier -low cost storage for archive/backups
+Amazon Glacier Instant retrieval-Miniseond retrieval - great for data accessed once a quarter-Minimum storage duration for 90 days
+Amazon Glacier Flexibal retrieval-Expedited 1 to 5min  Standard(3 to 5 hr)  Bulk (5 to 12 hours)
+Glacier Deep Archive-Standard (12 hours)  Bulk(48 hours-long storage lowest cost 180days
+Intelligent Tiering-move objects automatically between access tiers
+
+
+You can use lifecycles policies to move the objects in diff stroages classes

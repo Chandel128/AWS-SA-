@@ -1,0 +1,267 @@
+######################VPC######################
+Cidr-classless internet domain routing
+0.0.0.0/32
+
+
+Baseip-represents a ip in the range of xx.xx.xx.xx
+   
+
+Subnet Mask
+Defines how many bits can change in the ip
+can take two forms:  /8 255.0.0.0
+                     /16 255.255.0.0
+					 /24  255.255.255.0
+					 /32  255.255.255.255
+					 
+					 
+The subnet mask basically allows part of the underlying ip to gets additional next values from the base ip
+/32 2^0   192.168.0.0
+/31 2^1   192.168.0.0  192.168.0.1
+/30 2^2
+/29 2^3
+
+
+Octets
+/32-no octet can change
+/24-last octet can clange
+/16-last 2 can change
+/8-last 3 octet can change
+/0-all octet can change
+
+
+
+Internet Gateways and Route Tables
+
+Internet Gateways are used to provide internet access to your resources(EC2) in your Vpc
+but we have to edit route table so that it can connect to ec2 and then connect to router and from router to internet gateway
+we have to add a route for over internet gateway 
+
+0.0.0.0/0	igw-0dca9dff2879f2178	Active	No    this means any ip on internet will have access to this .
+172.31.0.0/16	local	Active	No     Means any ip within this will have access to vpc
+
+
+so any ip with 172.31.00.0/16 route to local vpc
+any ip with 0.0.0.0 route the traffic to internet gateway
+
+
+
+Bastian Hosts
+To access the ec2 in private subnet
+you have add a rule from private ec2 to sg of bastian with ssh 22
+
+
+
+###############
+NAT Instance and NAT Gateway:
+Network Address Transition
+Allow ec2 in private subnet to get access to internet
+NAT instance is outdated now but it must be created in public subnet
+Launch this instance in the public subnet and then add a elastic ip to this
+Route tables must be configured to route traffic from private instance to ec2
+
+
+Create a nat instance you will find the ami in marketplcae
+Edit route table 
+from any ip 0.0.0.0 goes thorugh NAT instance ec2id 
+In Nat instance you have manage them yourself less bandwidth less availability
+
+So we use ##########AWS Managed NAT Gateway#######
+it is aws managed and use elastic ip
+it should be in other ec2 not on same subnet as ec2
+It require a internet gateway Private>>NAT.>IGW
+In summary, while a NAT Gateway enables outbound internet access for instances in private subnets,
+ an Internet Gateway is still necessary for overall connectivity to the internet and for enabling bidirectional communication with resources outside of your VPC.
+ Both serve different purposes and are often used together to achieve a comprehensive networking setup in AWS.
+ NAT Gateway will also need internet connectivity
+ NAT gateway is resilient in single Availability zone
+ mUST Create a multiple NAT gateways in multiple AZ for fault tolerance
+
+setup 
+create a NAT GATEWAY ALLOCATE IP THEN 
+ADD RULE
+0.0.0.0 nat gateway
+
+
+###########NACL and Security group##################
+NACL -Network Access control list-extra layer of protection
+NACL is stateless means you have to set inbound as well outbound rules both are evaluated 
+SG is statefull means if it accepted the inbound then outbound will be allowed also.Only one is evaluated
+Rules>>NACL>>SG RULES>>EC2
+
+
+NACL are like firewalls which allow traffic from and to subnets
+One NACL per subnet,new subnets are assigned the default NACL
+You have to define NACL rules:
+Rules will have a number (1-32766) higher precendance with a lower number 
+First rule will match the decision
+Example:if you define #100 ALLOW AND #200 DENY it will take 100 rule first
+NACl will block an Ip at an subnet level 
+
+Default NACL Accept everything inbound/outbound with the subnets it is associated with
+Do not modify the default Nacl creae a custom NACL
+
+
+####EPHERMAL PORTS##########
+for any endpoints to establish a connection,they must use ports
+Client connect to a defined port, and expect a response from a ephermal ports
+
+
+NACL WITH EPHERMAL PORTS##########
+
+WEB SUBNET PULIC                           DATABASE SUBNET PRIVATE 
+NACL                                          NACL
+ALLOW OUTBOUND TCP TO 3306                  ALLOW INBOUND TCP TO 3306
+ALLOW INBOUND TCP TO 1024-65535             ALLOW OUTBOUND TCP ON PORT TO 1024-65535
+FROM DB SUBNET CIDR                         TO WEB SUBNET CIDR
+
+Stateful-return traffic is automatically allowed,regardless of rules.
+Stateless-return traffic must be explicitly allowed by rules
+
+
+
+NACL will apply to all the ec2 within in the subnet
+
+###########VPC Peering#########
+Privately connect two Vpc using AWS Network
+vpc peering connection is not transitive must be established for each vpc that need to communicate with each other.
+You can create VPC peering connection between vpc in different AWS regions/accounts
+
+Create a Vpc peering connections using peering connections service
+
+remember vpc cidr shuld not concide
+You have to set route now any connection with vpc cidr and select peering connection on both vpc with same entries.
+
+
+############AWS PRIVATE LINK=VPC ENDPOINT
+Suppose we have a ec2 in private network and we want to access to differenct aws services like cloudfront,s3,rds 
+so we have to create a vpc endpoint and then connect it directly 
+otherwise it will follow ec2.>nat..>>igw>internet>sns service  this is also a method but we have to go through IGW and NAT gateway then it will be done amd it will create more cost.
+vpc endpoint will be deployed in your vpc and it will connect your private ec2 with your vpc
+
+Interface Endpoints-Provision as ENI (private ip address)as an entry point must attach to a security group
+Gateway Endpoints-Provisions a gateway and must be used as a target in route table (does not use security groups) support both s3 and dynamo db
+
+Exam : Gateway or interface endpoint for S3 ?
+Gateway is most likely to be perferred all the time at the exam 
+Cost for free for gateway $ for interface you just have to add a target in route table
+
+Interface endpoint is needed only when access is required from On-premises a different VPC or a different region Site to Site Vpn or Direct Connect,a different vpc or different region.
+
+
+
+######VPC flow logs###################
+Action;success and failure of request due to security group/NACL
+can be used for analytics on usage pattern or malicious behaviour
+Query Vpc flow logs using Athena on s3
+
+
+Vpc Flow Logs Infrastructure:
+VPC Flow logs:Cloudwatch Logs:Cloudwatch  Contributor Insights :Top 10 IP addresses
+VPC Flow Logs:Cloudwatch logs:CW Alarm:Amazon SNS
+VPC Flow logs:S3 Bucket:Amazon Athena:Amazon Quicksight
+
+
+how to set Amazon Athena for vpc flow logs
+create tables and queries
+
+
+
+#####AWS site to site Vpn###########
+Virtual Private Gateway
+ Vpn concentrator on Aws side of the VPN connection
+ VGW is created and attached to the VPC from which you want to create the Site-to-site Connection
+ 
+ Customer Gateway
+ Software application physical device on the customer  side of the VPN connection
+ 
+ Customer Gateway Device(On premise_)
+  What ip address to use?
+  Public Internet routable ip address for your customer device
+  if its  a NAT device thats enabled for the NAT traversal use the public ip address of the NAT device.
+  Important Step:enable Route Propagation in your vpc  for the Virtual Private Gateway in the route table that is associated with your subnets .
+  if you need to ping your ec2 instances from on premises make sure you add the ICMP protocol on the inbound of the Security Group.
+  
+  For multiple site customer networks and you need multiple vpn connections 
+  use aws vpn cloudhub
+  
+  
+  
+  ###########Direct Connect######
+  Provide a dedicated private connection from a remote n/w or vpc
+  DX must be setup between your dc and aws direct connect locations
+  you need to setup virtual private gateway on your vpc 
+  Access public resources(s3) and private ec2 on same connection
+  
+  Use cases:
+  Increase bandwidth throughput-working with large data sets -lower cost 
+  More consistent n/w experience -application using real time data feeds 
+  Architecture:
+  
+  VPC EC2        Virtual Private Gateway   AWS Direct connect Location (AWS Direct Connect Endpoint) -(Customer or partner router)  Corporate data Centre(Customer router/firewall)
+                                               Private Virtual Interface
+											   Public Virtual Interface 
+  
+  It does not go through the public internet.
+ 
+ 
+ 
+ #########Direct Connect-Resilency
+ *High Resilency for critical workloads
+ you have to create multiple Aws Direct connection to  multiple corporate centre
+ *Max resilency for critical workloads
+ Multiple connection of Aws Direct connect 
+ Max resilence is acheived by separate connections terminating on separate devices in more than one connection.
+ 
+ 
+ In case you create direct connection and you want to create backup so you can create site to site vpn connection.
+ 
+ 
+ 
+ Transit Gateway:For having transitive peerings between thousands of VPC and on premises,hub and star connection.
+ 
+ Transit Gateway :Site to Site VPN ECMP (Equal cost Multi -path routing)
+ Use Case:Create multi Site-to -Site VPN Connections to increase your bandwidth of your connection to AWS
+ IF YOU  want to connect multi vpc from your site then you have to create Transit Gateway 
+ Transit Gateway -Share Direct Connect between multiple accounts
+ 
+Vpc
+vpc   Transit Gateway  Direct Connnect Gateway  AWS Direct Connection VLAN Customer site
+
+
+
+Egress only Internet gateway similar as NAT gateway but for ipv6 
+
+
+Network Protection On AWS
+NACLS
+VPC SG
+AWS WAF(protect against mulicious requests)
+AWS shield & shield advanced(For Ddos Protection)
+AWS firewall manager (to manage them across accounts)
+
+
+
+But what if we want to protect in sophisticated way our entire vpc
+AWS Network Firewall- it uses aws gateway load balancer
+
+
+VPC Traffic Mirroring
+Allows you to capture and inspect Network traffic in your Vpc
+Route the traffic to security appliances you manager 
+It will capture the traffic to security appliances you manage
+
+
+
+success alert
+Good job!
+
+
+
+AWS VPN CloudHub allows you to securely communicate with multiple sites using AWS VPN. It operates on a simple hub-and-spoke model that you can use with or without a VPC.
+Question 15:
+Your company has several on-premises sites across the USA.
+ These sites are currently linked using private connections, but your private connections provider has been recently quite unstable, making your IT architecture partially offline. 
+ You would like to create a backup connection that will use the public Internet to link your on-premises sites, that you can failover in case of issues with your provider. 
+ What do you recommend?
+
+

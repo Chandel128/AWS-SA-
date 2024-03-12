@@ -1,0 +1,21 @@
+##################SOLUTION Architect######################
+how you apply solutions as a architect
+
+5 Pillars for well architect application;
+Costs, Performance, Reliability, Security ,Operational Excellance
+
+
+Beanstalk
+You want to run your applicatio without managing the underlying structure.
+Mostly company uses the structure like elb asg rds 
+you have to set all the things manually so beastalk will do evrything its is free just you have to pay for underlying instances
+
+
+Web server environment                   Worker Environment
+                                           sqs 
+										   asg
+										   ec2 
+elb                                            
+asg
+ec2 
+you cant access ec2 in worker environment
