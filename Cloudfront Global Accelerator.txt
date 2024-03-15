@@ -1,0 +1,98 @@
+######Cloudfront#########
+Content Delivery Network
+caching data on edge location
+
+
+Cloudfront Origins
+S3 bucket
+For Distributing files and caching them at the edge 
+Enhanced security with cloudfront origin Access control
+OAC is replacing Origin Access Identity
+Cloudfront can be used as an ingress(to upload files on s3)
+
+
+Custom Origin(HTTP)
+Application Load Balancer
+EC2 instance
+S3 Website(must first enable the bucket as a static s3)
+
+
+Cloudfront vs S3 cross region Replication
+Global Edge Network
+Files are cached at TTL(maybe a day)
+Great for static content that must be available everywhere
+
+
+S3 Cross Region Replication
+Must be setup for each region you want replication to happen
+Files are updated in real time
+Read Only
+Great for dynamic content that needs to be available at low latency in few regions
+
+
+
+#Loadbalacner as a Origin
+Cloufront>>Edge Locations>>Pulblic ip of edge locations>>Ec2 Instances must be public
+Cloudfront>>ALB>EC2 PRIVATE>aLLOW SG TO EC2 FROM ALB 
+
+
+####cLOUDFRront Geo Restriction
+
+
+## Cloudfront-Pricing-edge locations are all around the world
+The cost of data out per edge location varies
+
+
+Price Classes:
+Price Class All-best performance all region
+Price Class 200-most regions,but excludes the most expensive regions
+Price class 100-only the least expensive regions
+
+
+Cloudfront-Cache Invalidation
+If you update the backend origin(s3,lb) and CF does not know about this and will get the refreshed content after ttl has expired.
+However you can force an entire cache refresh  by prrforming a cloudfront invalidation to bypass ttl.
+
+
+
+####Global Accelerator ##
+Global users for our application
+you have deployed an application and you have global users who want to access the application
+They can go the internet which can add a lot of latency due to many hops
+We wish to go as fast as possible through AWS network to minimize latency
+
+
+Unicast vs Anycast Ip
+one server hold one ip address-unicast
+all server hold same ip address and client is routed to nearest one 
+
+Global Accelerator works on the Anycast 
+Leverage the Aws internal network to route to your application
+2 Anycast Ip are created for your application
+The Anycast Ip send traffic directly to Edge Locations
+The Edge Locations send the traffic to your appplication
+Works with Elastic Ip,EC2 instances,ALB,NLB,public or private 
+It also perform health check for your applications
+
+
+Difference b/n GA and Cloudfront
+Both use global Network and edge locations around the world 
+Both integrates with Aws Shield for DDOS protection
+
+
+Cloudfront
+Improve performance for both cacheable content(such as images and videos)
+Dynamic Content (such as Api acceleration and dynamic site delivery)
+Content is served at the edge
+
+GA
+Improves performance for a wide range of applications over TCP or Udp
+Proxying packets at the edge to applications running in one or more Aws Regions
+Good fit for non http use cases such as gaming(UDP), IOT,Voice over Ip
+
+
+yOU HAVE TO ADD YOUR ENDPOINT GROUP IN GA 
+ENDPOINT CAN BE EC2 ,ALB,NLB,ELASTIC IP
+
+It will route you to the application nearest to your location
+like india neareset usa nearest
