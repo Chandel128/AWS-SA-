@@ -1,0 +1,204 @@
+#######################AWS Storage extras#########
+AWS SNOW FAMILY
+Highly secure,portable, devices to collect data at the edge and migrate data in and out of the Aws.
+
+Data Migration:
+Snowcone
+Snowball Edge
+Snowmobile
+
+
+Edge Computing:
+Snowcone
+Snowball Edge
+
+Snowball-like a box provided by aws you will put your data in this then aws will transfer
+How it works
+client - directly upload to s3
+
+client>snowball  ship  aws snowball  import/export s3 - Data migration from physical route not from n/w route 
+Physical data transport solution
+Alternative to moving data over the network
+
+
+Snowcone&Snowcone SSD
+Device used for edge computing,storage and data transfer
+Use snowcone where snowball does not fit(space constrained environment)
+Must provide your own battery and cables
+can be sent back to aws offline or connect it to internet and use Datasync to send data back to aws
+
+
+AWS Snowmobile-its actually like a truck for transferring of data
+
+
+2nd Use Case;
+Edge Computing
+Process data while its created on edge location:
+what is edge location:these location may have limited or no internet acccess 
+Limiting or no easy access to computing power
+We setup a Snowball Edge /Snowcone device to do edge computing
+
+
+
+AWS Opshub:to use snow Family devices,you needed a CLI
+
+
+
+Solution Architecture:Snowball into glacier
+Snowball can not import to glacier directly
+You must use S3 first in combination with s3 lifecycle policy
+
+
+
+
+
+###Amazon FSX#########
+launch third party high performance filesystem on AWS
+Fully Managed Service
+
+
+Amazon FSX for windows(File Server):
+fully managed windows file system drive
+can be mounted on linux ec2 instances
+
+
+Amazon FSx for Lustre
+Lustre is a parallel distributed file system for large-scale computing 
+Video Processing,Financial Modelling,Electronic Design Automation
+
+
+
+FSx File system Deployment Options:
+
+Scratch File System
+Temprary storage
+Data is not replicated (does not persist if file server fails)
+
+Persistent file system
+long term storage
+Data is replicated within same AZ
+Replace failed files within minutes
+
+
+Amazon Fsx for Netapp ONTAP
+Managed Netapp ONTAP on AWS
+File system compatible with NFS,SMB,iSCSI protocol
+Move workloads running on ONTAP or NAS to AWS 
+
+
+Works with:
+Linux
+windows
+macos
+Vmware cloud on AWS 
+
+
+Amazon fsx for openZFS
+Managed OpenZFS filesystem on AWS
+File System compatible with NFS(v3,v4,v4,)
+Move workloads running on ZFS to Aws
+##########################
+#######################################################################################################
+Storage Gateway-it is bridge betweeen your onpremises data and cloud data
+
+##########Hybrid Cloud for storage##
+Part of your infrastructure on the cloud
+Part of your infra on premises
+
+
+This can be sue to 
+Long Cloud migrations
+security requirements
+Compliance Requirements
+IT Strategy
+
+S3 is a propietary storage Technology so how do you expose the S3 data on premises
+AWS storage gateway
+
+it is bridge betweeen your onpremises data and cloud data
+Use cases:
+Disaster Recovery
+Backup and restore
+tiered storage
+on-premises cache and low latency file access
+
+
+Types of storage gateway
+
+*Amazon s3 file gateway
+
+Configured S3 buckets are accesible using NFS/SMB Protocol
+Most recently used data is cached in the file gateway
+Bucket access iam roles for each file gateway
+smb protocol has intergration with AD for user authentication
+
+
+Corporate Data centre                                                            aws Cloud 
+Application server   >> NFS OR SMB >> S3 FILE GATEWAY        https            s3 objects          lifecycle policy for archive
+
+
+
+
+#FSx file gateway
+Accesss from on premises to amazon cloud 
+if from on premises smb cliets want to access windows file server
+
+Corporate Data centre                                                            aws Cloud 
+Application server   >> smb client gateway  >> fsx file  GATEWAY                Windows file server  >Amazon fsx>> file systems
+
+
+#Volume gateway
+Block storage using iSCSI(Internet Small Computer System Interface) protocol backed by S3
+Backed by EBS snapshots which can help restore on premises volumes
+Cached volumes:low latency access to most recent data
+stored volumes:entire dataset is on premise,scheduled backup to s3
+
+
+Corporate Data centre                                                            aws Cloud 
+Application server   >> iscsi  >> volume GATEWAY     HTTPS            S3 Bucket >> Amazon EBS Snapshots 
+
+
+
+##Tape GATEWAY
+Some companies have backup processes using physical tapes
+With Tape Gateway companies use the same processes,but in the cloud 
+Virtual Tape Library backed by Amazon s3 and glacier
+
+
+GATEWAY SHOULD BE ON CORPORATE DATA CENTRE BUT if you do not have the resources you can also uses a Storage Gateway Hardware Appliance:
+
+#######################################################
+Amazon Transfer Family:
+A fully managed service for file transfers into and out of Amazon S3 or Amazon EFS using FTP protocol
+AWS Transfer to sftp
+for ftp 
+for ftp (only within vpc)
+
+
+####################################################
+Amazon Data Sync
+Move large amount of data to and from 
+on premises/other cloud to aws (nfs,smb,HDFS,S3 API..) --needs agent 
+AWS to Aws no agent needed
+
+
+Can synchronize to :
+Amazon S3(any storage classes -including Glacier)
+Amazon EFS
+Amazon FSX (Windows,lustre,Netapp,Open zfs )
+
+Replication tasks can be scheduled hourly,daily,weekly
+
+File permissions and metadata are preserved
+
+
+How it works:
+Corporate Data centre                                                            aws Cloud 
+NFS  server   >> NFS OR SMB PROTOCOL >>  aws DATASYNC AGENT    tls          AWS Datasync >> AWS storage resources(S3,EFS,FSX)
+
+we can use snowcone(because it has datasync agent preinstalled also)
+
+
+
+
+
