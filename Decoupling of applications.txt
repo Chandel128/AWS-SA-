@@ -1,0 +1,145 @@
+########Decoupling Applications###############
+When we start deploying multiple applications,they will inevitabely need to communicate with each other
+There are two patterns of application communication
+Synchronous Communication-Application to Application-
+Asynchronous Communication-Application to queue to Application
+
+
+Synchronous Communication can be problatic if there is sudden spike of traffic
+In that case it is better to decouple your applications
+Using SQS:queue model
+Using SNS:pub/sub model
+using kinesis:real time streaming model
+These services can scale indepedently from our application
+
+
+
+###SQS#########
+
+
+producer >> send messages >> SQS Queue >> poll messages >> Consumer 
+
+
+Amazon SQS Standard Queue:
+Oldest Offering 
+used to decoupling applications
+unlimited throughputs/unlimited messages
+Default Retention of messages 4 days,maximum of 14 days
+Low Latency << 10 ms on publish and receive 
+Limitation of 256kb per message sent 
+
+
+Can have duplicate messages
+can have out of messages
+
+SQS PRODUCING  MESSAGES:
+Producing to SQS using the SDK(Send Message API)
+The message is persisted in SQS until a consumer deleted it
+message retention:default 4 days to 14 days
+
+
+Example:send an order to be processed 
+Order id
+Customer id
+Any attributes you want 
+
+
+
+SQS Consumer Messages:
+Consumer(running on ec2 instances,servers or AWS Lambda)
+Poll Sqs for messages (receive up to 10 messages at a time)
+Process the messages(inserted the message into an RDS database)
+Delete the messages using delete msg api
+
+We can scale the consumer horizontally to improve throughput of processing
+SQS with Autocaling group
+SQS qUEUE >> poll messages >> ec2 asg
+|
+cloudwatch metric -queue Length-------------Alarm breach_____________________Cloudwatch alarm
+Approximate number of messages 
+
+
+SQS To decouple between Application tiers
+Front end web app >> SQS queue >>>>  Back end processing application >> insert >> s3 bucket 
+
+
+
+Amazon SQS Security:
+Encryption:
+in flight encryption using https API
+At rest encryption using KMS keys
+Client side encryption  if the client wants to perform encryption/decryption itself
+
+Acces Controls:IAM ROLES
+
+SQS ACCESS POLICIES - LIKE S3 BUCKET POLICY
+
+
+#SQS Message Visibility timeout
+ is 30 seconds
+ after a message polled by a consumer it becomes invisible to other consumers
+ 
+ SQS LONG POLLING
+ When a consumer requests messages from the queue it can optionally wait for messages to arrive if there are none in the queue
+ this is called long polling
+ Long Polling decreaing the number of api calls made to sqs while increasing the latency and efficeincy of your application
+ can be 1 sec to 20 sec
+ Long Polling is preferrable to short polling
+ Long Polling can be enabled at api level or queue level
+ 
+ 
+ SQS -FIFO Queue
+ FIRST IN FIRST OUT
+ ORDERING OF MESSAGES IN Queue
+ pRODUCER >> 4321 >> SQS >> 4321 >> Consumer(Ordering of messages in queue)
+ must end with .fifo
+ 
+ 
+ SQS with ASG
+ IF LOAD IS TOO BIG SOME DATA CAN BE LOST
+ SO WE NEED SQS AS A Buffer to database writes
+ 
+ 
+ #####SNS##
+ What if you want to send messages to many receivers?
+* Direct Intergation-you directly send messages to the various services
+ Buying service-------------------------Email Notification
+    |
+    |
+Shipping Service 
+SQS queue
+  
+*Pub/sub
+Publish Subscribe
+Buying service--------------------------Sns topic-it will send message to those who subscribe this-------------------Email Notification
+                                                                                                                      Fraud Service
+																													      Shippingservice
+Event Producer only send message to one Sns topic
+Each subscriber to the topic will get all the messages (note:new feature to filter messages)
+up to 1250000 subscriptions per topic 
+
+
+Aws Sns how to publish
+Topic Publish(using the SDK)
+
+create a topic
+create a subscription
+Publish to the topic
+
+Direct Publish
+create a platform application
+create a platform endpoint
+Publish to the platform endpoint 
+Works with Gooogle GCM,Apple APNS,Amazon ADM
+
+
+Security same as SQS:
+
+
+SQS+SNS:FAN OUT
+Push once in SNS,recieve in all SQS queues that are subcribers
+Fully decoupled,no data loss
+SQS allows for data persistence,delayed processing. and retries of work
+
+ 
+
